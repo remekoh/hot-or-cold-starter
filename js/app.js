@@ -1,5 +1,6 @@
 var secretNumber;
 var count = 0;
+var storedGuesses = [];
 
 $(document).ready(function() {
 
@@ -23,23 +24,31 @@ $(document).ready(function() {
         e.preventDefault();
         var guess = $('#userGuess').val();
         $('#userGuess').val('');
-        count++;
-        $('#count').text(count);
+
         if (guess > 100 || guess < 0) {
             $("#game-form")[0].reset();
             alert("enter a number between 1 and 100");
         }
+
         if (isNaN(guess)) {
             $("#game-form")[0].reset();
             alert("please enter a number");
         }
-        if (guess !== "") {
-            var entry = "<li>"+guess+"</li>"
-            $("#guessList").append(entry);
+
+        if (guess !== "" && (!isNaN(guess)) && (guess < 100 && guess > 0)) {
+            if (_.contains(storedGuesses, guess)) {
+                alert("That number has already been guessed");
+                $("form")[0].reset();
+            } else {
+                storedGuesses.push(guess);
+                var entry = "<li>" + guess + "</li>"
+                $("#guessList").append(entry);
+                count++;
+                $('#count').text(count);
+                feedback(guess);
+            }
         }
-
     });
-
 });
 
 //newGame function
@@ -49,13 +58,30 @@ function newGame() {
     $("#count").text("0");
     $('#userGuess').val('');
     $("#guessList").empty();
-    secretNumber = getRandom(1, 101);
+    secretNumber = getRandomInt(1, 101);
+    storedGuesses = [];
     // console.log(secretNumber);
-};
+}
 
-function getRandom(min, max) {
-    // var num =
-    return Math.floor(Math.random() * (max - min)) + min;
+function getRandomInt(min, max) {
+    var num = Math.floor(Math.random() * (max - min + 1) + min);
+    console.log(num);
+    return num;
+}
+
+//generate user feedback
+function feedback(guess) {
+    if (secretNumber === guess) {
+        $("#feedback").text("You are a WINNER!");
+    } else if (Math.abs(secretNumber - guess) < 10) {
+        $("#feedback").text("HOT");
+    } else if (Math.abs(secretNumber - guess) < 20 && Math.abs(secretNumber - guess) > 30) {
+        $("#feedback").text("KINDA HOT");
+    } else if (Math.abs(secretNumber - guess) < 10 && Math.abs(secretNumber - guess) > 3) {
+        $("#feedback").text("GETTING COLD");
+    } else {
+        $("#feedback").text("COLD");
+    }
 }
 
 
